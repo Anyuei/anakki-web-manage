@@ -1,0 +1,47 @@
+/* Login container styling */
+.login-container {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Fade-in animation */
+.fade-in {
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Card styling */
+.login-card {
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Button styling */
+.set-url-btn {
+    transition: background-color 0.3s;
+}
+
+.set-url-btn:hover {
+    background-color: #395cfc;
+}
+
+.login-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4a4a4a;
+}
+
+/* Captcha image styling */
+.captcha-img {
+    cursor: pointer;
+    margin-right: 8px;
+    border-radius: 4px;
+}

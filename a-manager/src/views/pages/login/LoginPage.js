@@ -1,6 +1,5 @@
-import React, {useEffect, useState} from 'react'
-import {useNavigate} from 'react-router-dom'
-
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     CButton,
     CCard,
@@ -9,149 +8,142 @@ import {
     CCol,
     CContainer,
     CForm,
-    CFormInput, CFormSelect,
+    CFormInput,
+    CFormSelect,
     CInputGroup,
     CInputGroupText,
     CRow,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import {cilLockLocked, cilLockUnlocked, cilUser} from '@coreui/icons'
-import LoginHeader from 'src/views/pages/login/LoginHeader'
-import axiosInstance, {API_BASE_URL, setBaseURL} from 'src/axiosInstance'
-import {Input, Button, message} from 'antd';
+} from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilLockLocked, cilLockUnlocked, cilUser } from '@coreui/icons';
+import LoginHeader from 'src/views/pages/login/LoginHeader';
+import axiosInstance, { API_BASE_URL, setBaseURL } from 'src/axiosInstance';
+import { message } from 'antd';
+import './LoginPage.css';
 
 const LoginPage = () => {
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    const [verify, setVerify] = useState('')
-    const [notice, setNotice] = useState('')
-    const [showPassword, setShowPassword] = useState(false) // 管理密码可见性
-    const navigate = useNavigate()
-    const [captcha, setCaptcha] = useState()
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [verify, setVerify] = useState('');
+    const [notice, setNotice] = useState('');
+    const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+    const [captcha, setCaptcha] = useState();
     const [apiBaseURL, setApiBaseURL] = useState('');
     const [protocol, setProtocol] = useState('http');
-    const [loading, setLoading] = useState(false) // 用于管理按钮的加载状态
+    const [loading, setLoading] = useState(false); // For button loading state
+    const navigate = useNavigate();
 
     useEffect(() => {
-        // Refresh the captcha when the component is mounted
-        refreshCaptcha()
-    }, [])
+        refreshCaptcha();
+    }, []);
 
     const refreshCaptcha = () => {
-        // Append a timestamp to the URL to force a refresh
-        setCaptcha(`${API_BASE_URL + '/base/system/captcha'}?${new Date().getTime()}`)
-    }
+        setCaptcha(`${API_BASE_URL + '/base/system/captcha'}?${new Date().getTime()}`);
+    };
 
     const handleSetBaseURL = () => {
         if (apiBaseURL) {
             const fullURL = `${protocol}://${apiBaseURL}`;
             setBaseURL(fullURL);
-            console.log('设置的 API 基地址:', fullURL);
+            console.log('Set API base URL:', fullURL);
         } else {
-            console.error('请输入有效的 API 基地址');
+            message.error('Please enter a valid API base URL');
         }
     };
+
     const handleLogin = async (e) => {
-        setLoading(true) // 在请求开始时禁用按钮
-        e.preventDefault()
-        const formData = {username, password, verify}
-        const response = await axiosInstance.post('/base/anakki/manager/login', formData)
-        localStorage.setItem('jwtManageToken', response)
-        navigate('/dashboard')
-        setNotice("登录成功")
-    }
+        e.preventDefault();
+        setLoading(true); // Disable button on request start
+        try {
+            const response = await axiosInstance.post('/base/anakki/manager/login', { username, password, verify });
+            localStorage.setItem('jwtManageToken', response);
+            navigate('/dashboard');
+            setNotice('Login successful');
+            message.success('Login successful');
+        } catch (error) {
+            message.error('Login failed. Please check your credentials.');
+            console.error('Login error:', error);
+        } finally {
+            setLoading(false); // Re-enable button after request finishes
+        }
+    };
+
     return (
         <div>
-            <LoginHeader/>
-            <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+            <LoginHeader />
+            <div className="login-container">
                 <CContainer>
                     <CRow className="justify-content-center">
                         <CCol md={8}>
-                            <CCardGroup>
-                                <CCard className="p-4">
-                                    <CCardBody className="p-4">
+                            <CCardGroup className="fade-in">
+                                <CCard className="login-card">
+                                    <CCardBody>
                                         <CCol xs={12}>
                                             <CRow>
                                                 <CCol md={3}>
-                                                    <CFormSelect value={protocol}
-                                                                 onChange={(e) => setProtocol(e.target.value)}>
+                                                    <CFormSelect value={protocol} onChange={(e) => setProtocol(e.target.value)}>
                                                         <option value="http">http</option>
                                                         <option value="https">https</option>
                                                     </CFormSelect>
                                                 </CCol>
                                                 <CCol xs={6}>
                                                     <CFormInput
-                                                        placeholder="请输入 API 基地址"
+                                                        placeholder="Enter API Base URL"
                                                         value={apiBaseURL}
                                                         onChange={(e) => setApiBaseURL(e.target.value)}
                                                     />
                                                 </CCol>
                                                 <CCol xs={3}>
-                                                    <CButton color="primary" className="px-4" type="button"
-                                                             onClick={handleSetBaseURL}>
-                                                        设置
+                                                    <CButton color="primary" onClick={handleSetBaseURL} className="set-url-btn">
+                                                        Set
                                                     </CButton>
                                                 </CCol>
                                             </CRow>
                                         </CCol>
-                                        <br/>
+                                        <br />
                                         <CForm onSubmit={handleLogin}>
-                                            <h4>登录</h4>
-                                            <p className="text-body-secondary">公告：</p>
+                                            <h4 className="login-title">Login</h4>
                                             {notice && <p id="manager-login-notice">{notice}</p>}
                                             <CInputGroup className="mb-3">
                                                 <CInputGroupText>
-                                                    <CIcon icon={cilUser}/>
+                                                    <CIcon icon={cilUser} />
                                                 </CInputGroupText>
                                                 <CFormInput
-                                                    placeholder="用户名"
-                                                    autoComplete="username"
+                                                    placeholder="Username"
                                                     value={username}
                                                     onChange={(e) => setUsername(e.target.value)}
                                                 />
                                             </CInputGroup>
                                             <CInputGroup className="mb-4">
                                                 <CInputGroupText>
-                                                    <CIcon icon={showPassword ? cilLockUnlocked : cilLockLocked}
-                                                           onClick={() => setShowPassword(!showPassword)}/>
+                                                    <CIcon icon={showPassword ? cilLockUnlocked : cilLockLocked} onClick={() => setShowPassword(!showPassword)} />
                                                 </CInputGroupText>
                                                 <CFormInput
-                                                    type={showPassword ? 'text' : 'password'} // 根据状态显示密码或文本
-                                                    placeholder="密码"
-                                                    autoComplete="current-password"
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    placeholder="Password"
                                                     value={password}
                                                     onChange={(e) => setPassword(e.target.value)}
                                                 />
                                             </CInputGroup>
-                                            <CInputGroup className="mb-4">
-                                                <div>
-                                                    <img
-                                                        className="captcha-img"
-                                                        src={captcha}
-                                                        alt="验证码"
-                                                        onClick={refreshCaptcha}
-                                                    />
-                                                </div>
+                                            <CInputGroup className="mb-4 captcha-group">
+                                                <img src={captcha} alt="Captcha" className="captcha-img" onClick={refreshCaptcha} title="Click to refresh" />
                                                 <CFormInput
                                                     type="text"
-                                                    className="form-control"
-                                                    placeholder="请输入验证码（点击图片刷新）"
+                                                    placeholder="Enter Captcha"
                                                     maxLength="6"
                                                     value={verify}
                                                     onChange={(e) => setVerify(e.target.value)}
                                                 />
                                             </CInputGroup>
-
                                             <CRow>
                                                 <CCol xs={3}>
-                                                    <CButton color="primary" className="px-4" type="submit"
-                                                             disabled={loading}>
-                                                        {loading ? '登录中...' : '登录'}
+                                                    <CButton type="submit" color="primary" disabled={loading}>
+                                                        {loading ? 'Logging in...' : 'Login'}
                                                     </CButton>
                                                 </CCol>
                                                 <CCol xs={3} className="text-right">
-                                                    <CButton color="link" className="px-0" style={{float: 'right'}}>
-                                                        忘记密码
+                                                    <CButton color="link" style={{ float: 'right' }}>
+                                                        Forgot Password?
                                                     </CButton>
                                                 </CCol>
                                             </CRow>
@@ -164,7 +156,7 @@ const LoginPage = () => {
                 </CContainer>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default LoginPage
+export default LoginPage;
